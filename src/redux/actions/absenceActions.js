@@ -2,7 +2,7 @@ import * as Constant from "./actionTypes";
 
 export const fetchAbsenceData = async (dispatch) => {
   try {
-    const API_URL = `${Constant.API_BASE_URL}absences`;
+    const API_URL = process.env.REACT_APP_API_URL + `absences`;
     const response = await fetch(API_URL);
     if (!response.ok) {
       throw new Error("Failed to fetch absences");
@@ -88,7 +88,7 @@ export const closeModal = () => ({
 
 export const fetchConflicts = async (employeeId, dispatch) => {
   try {
-    const API_URL = `${Constant.API_BASE_URL}conflict/${employeeId}`;
+    const API_URL = process.env.REACT_APP_API_URL + `conflict/${employeeId}`;
     const response = await fetch(API_URL);
     if (!response.ok) {
       throw new Error("Failed to check conflict");

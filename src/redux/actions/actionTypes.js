@@ -9,4 +9,3 @@ export const UNFILTERED_ABSENCES = `UNFILTERED_ABSENCES`;
 export const SELECTED_EMPLOYEE_ABSENCES = `SELECTED_EMPLOYEE_ABSENCES`;
 export const OPEN_MODAL = `OPEN_MODAL`;
 export const CLOSE_MODAL = `CLOSE_MODAL`;
-export const API_BASE_URL = "https://front-end-kata.brighthr.workers.dev/api/";
