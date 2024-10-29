@@ -1,6 +1,8 @@
 import { fetchAbsenceData, fetchConflicts } from "./absenceActions";
 import * as Constant from "./actionTypes";
-import "jest-fetch-mock";
+import axios from "axios";
+
+jest.mock("axios");
 
 describe("fetchAbsenceData", () => {
   const mockDispatch = jest.fn();
@@ -8,7 +10,6 @@ describe("fetchAbsenceData", () => {
   const formatDate = jest.fn();
 
   beforeEach(() => {
-    fetch.resetMocks();
     mockDispatch.mockClear();
   });
 
@@ -36,16 +37,14 @@ describe("fetchAbsenceData", () => {
         startDate: "2022-05-28",
       },
     ];
-
-    fetch.mockResponseOnce(JSON.stringify(mockAbsences));
+    axios.get.mockResolvedValue({ data: mockAbsences });
 
     calculateEndDate.mockReturnValue("2022-06-09");
     formatDate.mockReturnValue("2022-05-28");
 
     await fetchAbsenceData(mockDispatch);
-
-    expect(fetch).toHaveBeenCalledWith(
-      "https://front-end-kata.brighthr.workers.dev/api/absences"
+    expect(axios.get).toHaveBeenCalledWith(
+      process.env.REACT_APP_API_URL + "absences"
     );
 
     expect(mockDispatch).toHaveBeenCalledWith({
@@ -55,19 +54,20 @@ describe("fetchAbsenceData", () => {
   });
 
   it("dispatches FETCH_ABSENCES_FAILURE on fetch failure", async () => {
-    fetch.mockRejectOnce(new Error("Failed to fetch absences"));
+    const errorMessage = "Failed to fetch absences";
+    axios.get.mockRejectedValue(new Error(errorMessage));
 
     await fetchAbsenceData(mockDispatch);
 
     expect(mockDispatch).toHaveBeenCalledWith({
       type: Constant.FETCH_ABSENCES_FAILURE,
-      payload: "Failed to fetch absences",
+      payload: errorMessage,
     });
   });
 
   it("dispatches FETCH_ABSENCES_FAILURE when response is not an array", async () => {
     const invalidData = { message: "This is not an array" };
-    fetch.mockResponseOnce(JSON.stringify(invalidData));
+    axios.get.mockResolvedValue({ data: invalidData });
 
     await fetchAbsenceData(mockDispatch);
 
@@ -83,19 +83,19 @@ describe("fetchConflicts", () => {
   const employeeId = "12345";
 
   beforeEach(() => {
-    fetch.resetMocks();
+    mockDispatch.mockClear();
   });
 
   it("dispatches CHECK_CONFLICT_SUCCESS on successful fetch", async () => {
     const mockConflictResponse = { conflicts: false };
-
-    fetch.mockResponseOnce(JSON.stringify(mockConflictResponse));
+    axios.get.mockResolvedValue({ data: mockConflictResponse });
 
     await fetchConflicts(employeeId, mockDispatch);
 
-    expect(fetch).toHaveBeenCalledWith(
-      `https://front-end-kata.brighthr.workers.dev/api/conflict/${employeeId}`
+    expect(axios.get).toHaveBeenCalledWith(
+      `${process.env.REACT_APP_API_URL}conflict/${employeeId}`
     );
+
     expect(mockDispatch).toHaveBeenCalledWith({
       type: Constant.CHECK_CONFLICT_SUCCESS,
       payload: mockConflictResponse.conflicts,
@@ -104,8 +104,7 @@ describe("fetchConflicts", () => {
 
   it("dispatches CHECK_CONFLICT_FAILURE on failed fetch", async () => {
     const errorMessage = "Failed to check conflict";
-
-    fetch.mockReject(new Error(errorMessage));
+    axios.get.mockRejectedValue(new Error(errorMessage));
 
     await fetchConflicts(employeeId, mockDispatch);
 
