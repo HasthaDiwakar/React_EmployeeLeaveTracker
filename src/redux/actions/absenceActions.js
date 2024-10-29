@@ -1,15 +1,12 @@
 import * as Constant from "./actionTypes";
+import axios from "axios";
 
 export const fetchAbsenceData = async (dispatch) => {
   try {
-    const API_URL = process.env.REACT_APP_API_URL + `absences`;
-    const response = await fetch(API_URL);
-    if (!response.ok) {
-      throw new Error("Failed to fetch absences");
-    }
-    const absenceData = await response.json();
-    if (Array.isArray(absenceData)) {
-      const transformedAbsenceData = absenceData.map((absence) => {
+    const API_URL = `${process.env.REACT_APP_API_URL}absences`;
+    const response = await axios.get(API_URL);
+    if (Array.isArray(response.data)) {
+      const transformedAbsenceData = response.data.map((absence) => {
         const fullName = `${absence.employee.firstName} ${absence.employee.lastName}`;
         const endDate = calculateEndDate(absence.startDate, absence.days);
         const startDate = formatDate(absence.startDate);
@@ -88,15 +85,16 @@ export const closeModal = () => ({
 
 export const fetchConflicts = async (employeeId, dispatch) => {
   try {
-    const API_URL = process.env.REACT_APP_API_URL + `conflict/${employeeId}`;
-    const response = await fetch(API_URL);
-    if (!response.ok) {
-      throw new Error("Failed to check conflict");
-    }
-    const conflictResponse = await response.json();
+    const API_URL = `${process.env.REACT_APP_API_URL}conflict/${employeeId}`;
+    const response = await axios.get(API_URL);
+    // const response = await fetch(API_URL);
+    // if (!response.ok) {
+    // throw new Error("Failed to check conflict");
+    // }
+    // const conflictResponse = await response.json();
     dispatch({
       type: Constant.CHECK_CONFLICT_SUCCESS,
-      payload: conflictResponse.conflicts,
+      payload: response.data.conflicts,
     });
   } catch (err) {
     dispatch({ type: Constant.CHECK_CONFLICT_FAILURE, payload: err.message });
